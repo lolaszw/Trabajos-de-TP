@@ -1,12 +1,9 @@
-// ============================================================
-// CRONOMETRO SIMPLE (sin antirrebote) - máquina de estados + millis()
-// D2 = START/PAUSE   D3 = STOP/RESET   (a GND, INPUT_PULLUP)
-// ============================================================
 
-const int botonInicio = 2;
-const int botonPausa = 3;
 
-// --- Estados del cronómetro ---
+#define botonInicio  2;
+#define botonPausa 3;
+
+
 enum Estado { apagado,
               contando,
               pausado };
@@ -15,54 +12,71 @@ Estado estado = apagado;
 int segundos = 0;
 int minutos = 0;
 
-unsigned long ultimoSegundo = 0;  // último momento en que sumamos 1 segundo
+unsigned long tiempo = 0;  
 
-// Para detectar el momento exacto en que se presiona el botón (flanco)
-int anteriorStart = HIGH;
-int anteriorStop = HIGH;
+
+int anteriorInicio = HIGH;
+int anteriorPausa = HIGH;
 
 void setup() {
   Serial.begin(9600);
   pinMode(botonInicio, INPUT_PULLUP);
   pinMode(botonPausa, INPUT_PULLUP);
-  Serial.println("Cronometro listo. 00:00");
+  Serial.println("00:00");
 }
 
 void loop() {
-  // --- Leer botones (sin antirrebote) ---
-  int actualStart = digitalRead(botonInicio);
-  int actualStop = digitalRead(botonPausa);
 
-  bool pulsoStart = (actualStart == LOW && anteriorStart == HIGH);
-  bool pulsoStop = (actualStop == LOW && anteriorStop == HIGH);
+  int estadoInicio = digitalRead(botonInicio);
+  int estadoPausa = digitalRead(botonPausa);
 
-  anteriorStart = actualStart;
-  anteriorStop = actualStop;
+  anteriorInicio = estadoInicio;
+  anteriorPausa = estadoPausa;
 
-  // --- Máquina de estados del cronómetro ---
-  if (pulsoStart) {
-    if (estado == apagado || estado == pausado) {
-      estado = contando;
-    } else {
-      estado = pausado;
-    }
+
+  switch (estado) {
+    case (apagado):
+      {
+        segundos = 0;
+        minutos = 0;
+        Serial.println(minutos
+                       : segundos);
+        if (estadoInicio == LOW && anteriorInicio == HIGH) {  //si se presiona el boton de inicio, empieza a contar
+          estado = contando;
+          tiempo = millis();
+        }
+        break;
+      }
+    case (contando):
+      {
+        if (millis() - tiempo >= 1000) {  //cada un segundo, se incrementan los segundos
+          segundos++;
+        }
+        if (segundos >= 60) {  //cuando llega a los 60 segundos, se incrementa el minuto y los segundos se reinician
+          segundos = 0;
+          minutos++;
+        }
+        Serial.println(minutos
+                       : segundos);            //lo muestra por el serial port
+        if (estadoPausa == LOW && anteriorPausa == HIGH) {  //si se presiona el boton de pausa
+          estado = pausado;
+        }
+        if (estadoInicio == LOW && anteriorInicio == HIGH) {  //si se presiona el boton de inicio, se apaga el timer
+          estado = apagado;
+        }
+        break;
+      }
+    case (pausado):
+      {
+        Serial.println(minutos
+                       : segundos);  //muestra como va el tiempo
+
+        if (estadoPausa == LOW && anteriorPausa == HIGH) {  //si se presiona el boton de pausa, sigue contando
+          estado = contando;
+        }
+        if (estadoInicio == LOW && anteriorInicio == HIGH) {  //si se presiona el boton de inicio, se apaga el timer
+          estado = apagado;
+        }
+        break;
+      }
   }
-
-  if (pulsoStop) {
-    estado = apagado;
-    segundos = 0;
-    minutos = 0;
-    Serial.println(minutos : segundos);
-  }
-
-  // --- "Timer" de 1 segundo usando millis() ---
-  if (estado == contando && millis() - ultimoSegundo >= 1000) {
-    ultimoSegundo = millis();
-    segundos++;
-    if (segundos >= 60) {
-      segundos = 0;
-      minutos++;
-    }
-    Serial.println(minutos : segundos);
-  }
-}
