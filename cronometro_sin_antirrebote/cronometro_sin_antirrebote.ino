@@ -1,7 +1,7 @@
 
 
-#define botonInicio  2;
-#define botonPausa 3;
+#define botonInicio 2
+#define botonPausa 3
 
 
 enum Estado { apagado,
@@ -12,7 +12,7 @@ Estado estado = apagado;
 int segundos = 0;
 int minutos = 0;
 
-unsigned long tiempo = 0;  
+unsigned long tiempo = 0;
 
 
 int anteriorInicio = HIGH;
@@ -39,8 +39,9 @@ void loop() {
       {
         segundos = 0;
         minutos = 0;
-        Serial.println(minutos
-                       : segundos);
+        Serial.print(minutos);
+        Serial.print(":");
+        Serial.println(segundos);
         if (estadoInicio == LOW && anteriorInicio == HIGH) {  //si se presiona el boton de inicio, empieza a contar
           estado = contando;
           tiempo = millis();
@@ -56,8 +57,9 @@ void loop() {
           segundos = 0;
           minutos++;
         }
-        Serial.println(minutos
-                       : segundos);            //lo muestra por el serial port
+        Serial.print(minutos);
+        Serial.print(":");
+        Serial.println(segundos);                      //lo muestra por el serial port
         if (estadoPausa == LOW && anteriorPausa == HIGH) {  //si se presiona el boton de pausa
           estado = pausado;
         }
@@ -68,12 +70,13 @@ void loop() {
       }
     case (pausado):
       {
-        Serial.println(minutos
-                       : segundos);  //muestra como va el tiempo
+        Serial.print(minutos);
+        Serial.print(":");
+        Serial.println(segundos); //muestra como va el tiempo
 
         if (estadoPausa == LOW && anteriorPausa == HIGH) {  //si se presiona el boton de pausa, sigue contando
           estado = contando;
-          tiempo=millis();
+          tiempo = millis();
         }
         if (estadoInicio == LOW && anteriorInicio == HIGH) {  //si se presiona el boton de inicio, se apaga el timer
           estado = apagado;
@@ -81,3 +84,4 @@ void loop() {
         break;
       }
   }
+}
