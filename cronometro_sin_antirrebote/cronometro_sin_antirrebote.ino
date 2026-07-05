@@ -73,6 +73,7 @@ void loop() {
 
         if (estadoPausa == LOW && anteriorPausa == HIGH) {  //si se presiona el boton de pausa, sigue contando
           estado = contando;
+          tiempo=millis();
         }
         if (estadoInicio == LOW && anteriorInicio == HIGH) {  //si se presiona el boton de inicio, se apaga el timer
           estado = apagado;
