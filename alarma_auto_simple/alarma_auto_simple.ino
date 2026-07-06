@@ -1,6 +1,6 @@
 
-#define botonAlarma 2;
-#define ledAlarma 13;
+#define botonAlarma 2
+#define ledAlarma 13
 
 enum Alarma {
   APAGADA,
@@ -40,7 +40,7 @@ void loop() {
       }
       break;
 
-    case ALARMA_ACTIVADA:
+    case ACTIVADA:
       digitalWrite(ledAlarma, HIGH);
       if (boton == HIGH) {  //si sueltan el boton se apaga la alarma
         digitalWrite(ledAlarma, LOW);
