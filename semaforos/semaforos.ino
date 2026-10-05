@@ -268,6 +268,7 @@ void actSemaforo_2() {
 
 
 void loop() {
+  recibirTiempos();
   switch (semaforoActual) {
     case SEMAFORO1:
       {
